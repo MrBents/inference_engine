@@ -37,16 +37,16 @@ class Predictor:
         # else:
         with self.graph.as_default():
             if '45' in z_type or 'max' in z_type and self.curr_mod != 'max45':
+
                 head_model = self.mapper['max45heads']
                 top_model = self.mapper['max45tops']
                 self.curr_mod = 'max45'
+
             elif self.curr_mod != '42':
+                
                 self.curr_mod = '42'
                 head_model = self.mapper['42heads']
                 top_model = self.mapper['42tops']
-
-
-            # head = head_model.predict(img_head_path)
 
             head_pred = []
             mini = int(round(img_head_path.shape[1]*0.03))
@@ -67,16 +67,9 @@ class Predictor:
                 self.reshape_image_for_cnn(img_head_path, 'head')))
             head = int(np.round(np.array(head_pred).mean()))
 
-            # if (head == 0):
-            #     head = 1
-            # elif (head == 1):
-            #     head = 0
             top = top_model.predict(
                 self.reshape_image_for_cnn(img_top_path, 'top'))
-            # if (top == 0):
-            #     top = 1
-            # elif (top == 1):
-            #     top = 0
+
             final_result = head * top
             print((head, top, final_result))
             return head, top, final_result
@@ -115,21 +108,17 @@ class Model:
         else:
             res = 1
 
-        # pred = np.argmax(pred, 1)
-        # return (pred[0])
         return res
 
 
 class ModelRecords:
     def __init__(self):
-        # self.records = {'max45heads': '/home/enigma/Desktop/models/MobV2_FINAL2_HEADS_CNN_NEW33.h5',
-        #                 'max45tops': '/home/enigma/Desktop/models/Mobilenet__FINAL_TOPS_CNN.h5'}
-        # self.records = {'42heads': '/home/enigma/Desktop/models/MobV2_FINAL2_HEADS_42.h5',
-        #                 '42tops': '/home/enigma/Desktop/models/MobV2_FINAL_TOPS_42_5.h5'}
-        self.records = {'42heads': '/home/enigma/Desktop/models/heads_mobv1_42_new_3.5.h5',
-                        '42tops': '/home/enigma/Desktop/models/MobV2_FINAL_TOPS_42_5.h5',
-                        'max45heads': '/home/enigma/Desktop/models/MobV2_FINAL2_HEADS_CNN_NEW33.h5',
-                        'max45tops': '/home/enigma/Desktop/models/Mobilenet__FINAL_TOPS_CNN.h5'}
+        
+        self.records = {'42heads': '/home/alfred/Desktop/inference_engine/models/heads_mobv1_42_new_3.5.h5',
+                        '42tops': '/home/alfred/Desktop/inference_engine/models/MobV2_FINAL_TOPS_42_5.h5',
+                        'max45heads': '/home/alfred/Desktop/inference_engine/models/MobV2_FINAL2_HEADS_CNN_NEW33.h5',
+                        'max45tops': '/home/alfred/Desktop/inference_engine/models/Mobilenet__FINAL_TOPS_CNN.h5'}
+
         self.thresholds = {'42heads': 0.98, '42tops': 0.99, 'max45heads': 0.98, 'max45tops': 0.99}
 
 
@@ -187,13 +176,9 @@ def parse_request():
     imag_1 = request.files['img_top'].read()
     imag_2 = request.files['img_head'].read()
 
-    # imgarr_1 = np.asarray(bytearray(img_1), dtype=np.uint64)
-    # imgarr_2 = np.asarray(bytearray(img_2), dtype=np.uint64 )
-
     imgarr_1 = np.fromstring(imag_1, np.uint8)
     imgarr_2 = np.fromstring(imag_2, np.uint8)
 
-    # print((imgarr_1.shape, imgarr_2.shape))
 
     img_1 = cv2.imdecode(imgarr_1, 0)
     img_2 = cv2.imdecode(imgarr_2, 0)
@@ -201,22 +186,8 @@ def parse_request():
     img_top = img_1
     img_head = img_2
 
-    # cv2.imwrite('top' + str(im_counter) + '.jpg', img_top)
-    # cv2.imwrite('head' + str(im_counter) + '.jpg', img_head)
     im_counter += 1
 
-    # if (img_1.shape[1] == 226):
-    #     img_top = img_1
-    #     img_head = img_2
-    # else:
-    #     img_top = img_2
-    #     img_head = img_1
-
-    # image_top1 = reshape_input_image_for_cnn(img_top, 'top')
-    # image_head1 = reshape_input_image_for_cnn(img_head, 'head')
-    # print((image_top1.shape, image_head1.shape))
-    # show_img(image_top1)
-    # print(image_head1)
 
     prediction = predictor.predict(img_head, img_top, zipper_type)
     print(prediction)
